@@ -2,29 +2,29 @@
 import { PLASMIC } from '@/plasmic-init';
 
 export async function getServerSideProps({ res }) {
-  const baseUrl = 'https://victorseda.xyz';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://echelonleads.site';
   
   // Fetch pages from Plasmic project
   const pageModules = await PLASMIC.fetchPages();
   
   // Convert Plasmic pages to sitemap format
-  const pages = pageModules.map((page) => {
-    // Assign priority based on path depth
-    let priority = '0.8'; // default priority
-    
-    if (page.path === '/') {
-      priority = '1.0'; // homepage highest priority
-    } else if (page.path.split('/').length > 3) {
-      priority = '0.6'; // deeper pages get lower priority
-    } else if (page.path.includes('/plasmic-host')) {
-      priority = '0.3'; // technical page gets lowest priority
-    }
-    
-    return {
-      path: page.path,
-      priority: priority
-    };
-  });
+  const pages = pageModules
+    .filter(page => !page.path.includes('/plasmic-host'))
+    .map((page) => {
+      // Assign priority based on path depth
+      let priority = '0.8'; // default priority
+      
+      if (page.path === '/') {
+        priority = '1.0'; // homepage highest priority
+      } else if (page.path.split('/').length > 3) {
+        priority = '0.6'; // deeper pages get lower priority
+      }
+      
+      return {
+        path: page.path,
+        priority: priority
+      };
+    });
   
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
     <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
